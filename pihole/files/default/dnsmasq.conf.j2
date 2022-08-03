@@ -1,0 +1,16 @@
+# Custom dnsmasq configuration managed by Salt.
+# Manual changes might be overwritten.
+
+{%  for var, val in pihole.config.dnsmasq | dictsort %}
+{%-   if val in [true, false] %}
+{%-     if val is true %}
+{{ var }}
+{%-     endif %}
+{%-   elif val | is_list %}
+{%-     for item in val %}
+{{ var }}={{ item }}
+{%-     endfor %}
+{%-   else %}
+{{ var }}={{ val }}
+{%-   endif %}
+{%- endfor %}

@@ -1,0 +1,127 @@
+{
+  "template": "https://github.com/lkubb/salt-template-formula",
+  "commit": "63b1c0066d38bfe946a650abeda910522638d427",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "_extensions": [
+        "local_extensions.YAMLDumper"
+      ],
+      "_jinja2_env_vars": {
+        "block_start_string": "{!",
+        "block_end_string": "!}",
+        "variable_start_string": "{=",
+        "variable_end_string": "=}",
+        "comment_start_string": "{@",
+        "comment_end_string": "@}"
+      },
+      "name": "PiHole",
+      "abbr": "pihole",
+      "abbr_pysafe": "pihole",
+      "pkg": "",
+      "needs_repo": "",
+      "config": "/etc/pihole/setupVars.conf",
+      "service": "pihole-FTL",
+      "subcomponent": "",
+      "subcomponent_config": "",
+      "git_username": "lkubb",
+      "_lookup": {
+        "setup_sh": "https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh",
+        "config_dnsmasq": "/etc/dnsmasq.d/05-salt.conf"
+      },
+      "_settings": {
+        "adlists": {
+          "absent": [],
+          "present": []
+        },
+        "blacklist": {
+          "absent": {
+            "plain": [],
+            "regex": [],
+            "wildcard": []
+          },
+          "present": {
+            "plain": [],
+            "regex": [],
+            "wildcard": []
+          }
+        },
+        "config": {
+          "app": {
+            "webpassword": null,
+            "webpassword_pillar": null,
+            "blocking_enabled": true,
+            "ipv4_address": null,
+            "ipv6_address": null,
+            "dnssec": false,
+            "pihole_interface": null,
+            "query_logging": true,
+            "install_web_server": true,
+            "install_web_interface": true,
+            "cache_size": 10000,
+            "dns_fqdn_required": true,
+            "dns_bogus_priv": true,
+            "dnsmasq_listening": "local",
+            "admin_email": "",
+            "lighttpd_enabled": true,
+            "webuiboxedlayout": "boxed",
+            "webtheme": "default",
+            "dns_upstream": [
+              "1.1.1.1",
+              "1.0.0.1"
+            ],
+            "api_query_log_show": "all",
+            "api_exclude_domains": [],
+            "api_exclude_clients": [],
+            "rev_server": {
+              "enabled": false,
+              "cidr": null,
+              "target": null,
+              "domain": null
+            },
+            "dhcp": {
+              "active": false,
+              "start": null,
+              "end": null,
+              "router": null,
+              "leasetime": null,
+              "ipv6": null,
+              "rapid_commit": null,
+              "domain": null
+            }
+          },
+          "dnsmasq": {},
+          "ftl": {
+            "privacylevel": 0
+          }
+        },
+        "custom_cname": {
+          "absent": [],
+          "present": {}
+        },
+        "custom_dns": {
+          "absent": [],
+          "present": {}
+        },
+        "groups": {
+          "absent": [],
+          "present": []
+        },
+        "whitelist": {
+          "absent": {
+            "plain": [],
+            "regex": [],
+            "wildcard": []
+          },
+          "present": {
+            "plain": [],
+            "regex": [],
+            "wildcard": []
+          }
+        }
+      },
+      "_template": "https://github.com/lkubb/salt-template-formula"
+    }
+  },
+  "directory": null
+}
