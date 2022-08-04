@@ -179,3 +179,7 @@ Runs all of the stages above in one go: i.e. ``destroy`` + ``converge`` + ``veri
 ^^^^^^^^^^^^^^^^^^^^^
 
 Gives you SSH access to the instance for manual testing.
+
+Todo
+----
+* `Automatically <https://github.com/jacklul/pihole-updatelists>`_ import `meta-lists <https://v.firebog.net/hosts/lists.php?type=tick>`_ and `whitelists <https://github.com/anudeepND/whitelist/>`_
