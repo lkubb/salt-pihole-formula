@@ -11,3 +11,4 @@ include:
   - .group
   - .whitelist
   - .service
+  - .tls

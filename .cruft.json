@@ -27,7 +27,8 @@
       "git_username": "lkubb",
       "_lookup": {
         "setup_sh": "https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh",
-        "config_dnsmasq": "/etc/dnsmasq.d/05-salt.conf"
+        "config_dnsmasq": "/etc/dnsmasq.d/05-salt.conf",
+        "lighttpd_openssl": "lighttpd-mod-openssl"
       },
       "_settings": {
         "adlists": {
@@ -106,6 +107,13 @@
         "groups": {
           "absent": [],
           "present": []
+        },
+        "tls": {
+          "enabled": false,
+          "hostname": "",
+          "hsts": false,
+          "pemfile": "",
+          "privkey": ""
         },
         "whitelist": {
           "absent": {

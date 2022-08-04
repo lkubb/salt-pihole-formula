@@ -133,6 +133,12 @@ pihole:
       # - children
       # - wife: false
     present: []
+  tls:
+    enabled: false
+    hostname: ''
+    hsts: false
+    pemfile: ''
+    privkey: ''
     # Manage PiHole whitelist entries.
     # For description, see blacklist above.
   whitelist:
@@ -269,6 +275,7 @@ pihole:
 # debug_extra: false
 
   lookup:
+    lighttpd_openssl: lighttpd-mod-openssl
     setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
 
   tofs:

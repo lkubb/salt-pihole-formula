@@ -12,6 +12,7 @@ values:
     service:
       name: pihole-FTL
     config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
+    lighttpd_openssl: lighttpd-mod-openssl
     setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
   adlists:
     absent: []
@@ -77,6 +78,12 @@ values:
   groups:
     absent: []
     present: []
+  tls:
+    enabled: false
+    hostname: ''
+    hsts: false
+    pemfile: ''
+    privkey: ''
   whitelist:
     absent:
       plain: []
