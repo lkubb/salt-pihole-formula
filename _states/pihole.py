@@ -578,7 +578,7 @@ def whitelist(name=None, domains=None, regex=False, wildcard=False):
     )
 
 
-def whitelist_absent():
+def whitelist_absent(name=None, domains=None, regex=False, wildcard=False):
     """
     Make sure domains are absent from PiHole's whitelists.
 
