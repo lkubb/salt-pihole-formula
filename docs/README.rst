@@ -16,6 +16,10 @@ PiHole Formula
 
 Manage PiHole with Salt.
 
+This formula also provides a custom execution and state module to manage PiHole beyond the setup.
+
+Mind that automatic testing is currently not implemented, even if suggested otherwise from forking the official template formula.
+
 .. contents:: **Table of Contents**
    :depth: 1
 
@@ -56,55 +60,112 @@ Available states
 ``pihole``
 ^^^^^^^^^^
 
-*Meta-state (This is a state that includes other states)*.
-
-This installs the pihole package,
-manages the pihole configuration file and then
-starts the associated pihole service.
+Includes everything found in this formula.
 
 ``pihole.package``
 ^^^^^^^^^^^^^^^^^^
 
-This state will install the pihole package only.
+Install PiHole only.
 
 ``pihole.config``
 ^^^^^^^^^^^^^^^^^
 
-This state will configure the pihole service and has a dependency on ``pihole.install``
-via include list.
+Configure PiHole, pihole-FTL and dnsmasq. Has a dependency on ``pihole.install``.
 
 ``pihole.service``
 ^^^^^^^^^^^^^^^^^^
 
-This state will start the pihole service and has a dependency on ``pihole.config``
-via include list.
+Start the pihole-FTL service. Has a dependency on ``pihole.config``.
+
+``pihole.adlist``
+^^^^^^^^^^^^^^^^^
+
+Manage adlists present in PiHole. Has a dependency on ``pihole.service``.
+
+``pihole.blacklist``
+^^^^^^^^^^^^^^^^^^^^
+
+Manage entries in PiHole's blacklist. Has a dependency on ``pihole.service``.
+
+``pihole.custom_cname``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Manage custom CNAME records in PiHole. Has a dependency on ``pihole.service``.
+
+``pihole.custom_dns``
+^^^^^^^^^^^^^^^^^^^^^
+
+Manage local DNS A/AAAA records in PiHole. Has a dependency on ``pihole.service``.
+
+``pihole.group``
+^^^^^^^^^^^^^^^^
+
+Manage groups present in PiHole. Has a dependency on ``pihole.service``.
+
+``pihole.tls``
+^^^^^^^^^^^^^^
+
+Configure and enable TLS for PiHole (lighttpd).
+
+``pihole.whitelist``
+^^^^^^^^^^^^^^^^^^^^
+
+Manage entries in PiHole's whitelist. Has a dependency on ``pihole.service``.
 
 ``pihole.clean``
 ^^^^^^^^^^^^^^^^
 
-*Meta-state (This is a state that includes other states)*.
-
-This state will undo everything performed in the ``pihole`` meta-state in reverse order, i.e.
-stops the service,
-removes the configuration file and
-then uninstalls the package.
+Should undo mostly everything in this formula. Mind that PiHole deinstallation is currently not implemented.
 
 ``pihole.service.clean``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-This state will stop the pihole service and disable it at boot time.
+Stops the pihole service and disable it at boot time.
 
 ``pihole.config.clean``
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-This state will remove the configuration of the pihole service and has a
-dependency on ``pihole.service.clean`` via include list.
+Removes PiHole, pihole-FTL and custom dnsmasq configuration files. Has a dependency on ``pihole.service.clean``
 
 ``pihole.package.clean``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-This state will remove the pihole package and has a depency on
-``pihole.config.clean`` via include list.
+**This state will fail.**
+
+``pihole.adlist.clean``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Removes all managed adlists from PiHole.
+
+``pihole.blacklist.clean``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Removes all managed blacklist entries from PiHole.
+
+``pihole.custom_cname.clean``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Removes all managed custom CNAME records from PiHole.
+
+``pihole.custom_dns.clean``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Removes all managed local DNS A/AAAA records from PiHole.
+
+``pihole.group.clean``
+^^^^^^^^^^^^^^^^^^^^^^
+
+Removes all managed groups.
+
+``pihole.tls.clean``
+^^^^^^^^^^^^^^^^^^^^
+
+Removes TLS configuration from lighttpd.
+
+``pihole.whitelist.clean``
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Removes all managed entries in PiHole's whitelist.
 
 Contributing to this repo
 -------------------------
