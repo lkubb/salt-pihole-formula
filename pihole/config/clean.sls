@@ -13,5 +13,6 @@ pihole-config-clean-file-absent:
     - names:
       - {{ pihole.lookup.config }}
       - {{ salt["file.basename"](pihole.lookup.config) | path_join("pihole-FTL.conf") }}
+      - {{ pihole.lookup.config_dnsmasq }}
     - require:
       - sls: {{ sls_service_clean }}
