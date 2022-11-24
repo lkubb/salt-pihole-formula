@@ -7,7 +7,7 @@ Manage PiHole with Salt.
 For some functions, this module needs the sqlite3 library.
 """
 
-import logging
+import logging as logging_
 import re
 import shlex
 from functools import wraps
@@ -24,7 +24,7 @@ try:
 except ImportError:
     HAS_SQLITE3 = False
 
-log = logging.getLogger(__name__)
+log = logging_.getLogger(__name__)
 __virtualname__ = "pihole"
 
 
@@ -1053,7 +1053,7 @@ def static_dhcp_list():
     mappings = parsed.get("dhcp-host", [])
     mappings = [mappings] if not isinstance(mappings, list) else mappings
 
-    for m in mappingss:
+    for m in mappings:
         mac, *conf = m.split(",")
         if len(conf) > 1:
             ip, host = conf
