@@ -16,6 +16,7 @@ pihole:
   adlists:
     absent: []
     present: []
+  autoupdate: true
   blacklist:
     absent:
       plain: []

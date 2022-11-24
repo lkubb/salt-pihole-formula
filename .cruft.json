@@ -31,6 +31,7 @@
         "lighttpd_openssl": "lighttpd-mod-openssl"
       },
       "_settings": {
+        "autoupdate": true,
         "adlists": {
           "absent": [],
           "present": []

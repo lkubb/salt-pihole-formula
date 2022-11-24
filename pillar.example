@@ -3,6 +3,8 @@
 # yamllint disable rule:comments-indentation
 ---
 pihole:
+  # Automatically keep PiHole up to date
+  autoupdate: true
     # Manage PiHole adlists.
   adlists:
       # List of adlist URLs that should be absent from PiHole.
@@ -101,7 +103,7 @@ pihole:
       # https://docs.pi-hole.net/ftldns/configfile/ for reference.
     ftl:
         # This is the default setting. Description see below.
-      privacy_level: 0
+      privacylevel: 0
     # Manage custom CNAME records.
   custom_cname:
       # List of domains that should not have a custom CNAME record.
@@ -275,6 +277,7 @@ pihole:
 # debug_extra: false
 
   lookup:
+    config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
     lighttpd_openssl: lighttpd-mod-openssl
     setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
 
