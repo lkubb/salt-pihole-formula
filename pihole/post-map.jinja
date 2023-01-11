@@ -2,21 +2,24 @@
     Automatically generate secrets if they were not specified.
 -#}
 
-{%- if mapdata | traverse("config:app:webpassword") is none %}
-  {%- if mapdata | traverse("config:app:webpassword_pillar") is not none and
-          salt["pillar.get"](mapdata.config.app.webpassword_pillar) is not none
-  -%}
-    {%- set pw = salt["pillar.get"](mapdata.config.app.webpassword_pillar) %}
-  {%- else %}
-    {#- This has been deprecated and will be removed in v3005 @FIXME -#}
-    {%- set pw = salt["grains.get_or_set_hash"](
-                      'pihole.config.app.webpassword',
-                      length=32,
-                      chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-                    ) -%}
-  {%- endif %}
-  {%- set hash1 = salt["hashutil.digest"](pw, checksum="sha256") -%}
-  {%- set hash2 = salt["hashutil.digest"](hash1, checksum="sha256") -%}
+{%- if mapdata | traverse("config:app:webpassword") is none -%}
+  {%- set webpassword = "" -%}
+  {%- set hash2 = "" -%}
+  {%- if mapdata | traverse("config:app:webpassword_pillar") is not none -%}
+    {%- set webpassword = salt["pillar.get"](mapdata.config.app.webpassword_pillar) -%}
+  {%- endif -%}
+  {%- if not webpassword -%}
+    {%- if salt["file.file_exists"](mapdata.lookup.config) -%}
+      {%- set hash2 = salt["cmd.run_stdout"]("source '" ~ mapdata.lookup.config ~ "'; echo $WEBPASSWORD", python_shell=True) -%}
+    {%- endif -%}
+    {%- if not hash2 -%}
+      {%- set webpassword = salt["random.get_str"](32, punctuation=false) -%}
+    {%- endif -%}
+  {%- endif -%}
+  {%- if not hash2 -%}
+    {%- set hash1 = salt["hashutil.digest"](webpassword, checksum="sha256") -%}
+    {%- set hash2 = salt["hashutil.digest"](hash1, checksum="sha256") -%}
+  {%- endif -%}
   {%- do mapdata | update_dict_key_value("config:app",
         {
           "webpassword": hash2
