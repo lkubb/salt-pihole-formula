@@ -17,6 +17,4 @@ PiHole wanted CNAME entries are absent:
       - {{ cname }}:
         - target: {{ target }}
 {%-   endfor %}
-    - require:
-      - sls: {{ sls_package_install }}
 {%- endif %}

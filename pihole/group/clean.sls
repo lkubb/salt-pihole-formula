@@ -20,6 +20,4 @@ PiHole groups are managed:
       - {{ group }}
 {%-     endif %}
 {%-   endfor %}
-    - require:
-      - sls: {{ sls_package_install }}
 {%- endif %}

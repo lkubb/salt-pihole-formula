@@ -17,6 +17,4 @@ PiHole wanted custom DNS A/AAAA entries are absent:
       - {{ domain }}:
         - ip: {{ target }}
 {%-   endfor %}
-    - require:
-      - sls: {{ sls_package_install }}
 {%- endif %}
