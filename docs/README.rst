@@ -90,12 +90,6 @@ Manages the PiHole, pihole-FTL and custom dnsmasq configurations.
 Has a dependency on `pihole.package`_.
 
 
-``pihole.service``
-^^^^^^^^^^^^^^^^^^
-Starts the pihole-FTL service and enables it at boot time.
-Has a dependency on `pihole.config`_.
-
-
 ``pihole.adlist``
 ^^^^^^^^^^^^^^^^^
 Manages PiHole adlists and updates the gravity database.
@@ -126,16 +120,22 @@ Manages PiHole groups.
 Has a dependency on `pihole.service`_.
 
 
-``pihole.tls``
-^^^^^^^^^^^^^^
-Configure and enable TLS for PiHole (lighttpd).
-Has a dependency on `pihole.package`_.
-
-
 ``pihole.whitelist``
 ^^^^^^^^^^^^^^^^^^^^
 Manages PiHole whitelist entries.
 Has a dependency on `pihole.service`_.
+
+
+``pihole.service``
+^^^^^^^^^^^^^^^^^^
+Starts the pihole-FTL service and enables it at boot time.
+Has a dependency on `pihole.config`_.
+
+
+``pihole.tls``
+^^^^^^^^^^^^^^
+Configure and enable TLS for PiHole (lighttpd).
+Has a dependency on `pihole.package`_.
 
 
 ``pihole.clean``
@@ -160,11 +160,6 @@ Has a dependency on `pihole.config.clean`_.
 ^^^^^^^^^^^^^^^^^^^^^^^
 Removes the PiHole, pihole-FTL and custom dnsmasq configurations and has a
 dependency on `pihole.service.clean`_.
-
-
-``pihole.service.clean``
-^^^^^^^^^^^^^^^^^^^^^^^^
-Stops the pihole-FTL service and disables it at boot time.
 
 
 ``pihole.adlist.clean``
@@ -197,15 +192,20 @@ Removes managed PiHole groups.
 This does not restart PiHole on its own. To apply, you will need to restart manually.
 
 
-``pihole.tls.clean``
-^^^^^^^^^^^^^^^^^^^^
-Removes TLS configuration from lighttpd.
-
-
 ``pihole.whitelist.clean``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Removes managed PiHole whitelist entries.
 This does not restart PiHole on its own. To apply, you will need to restart manually.
+
+
+``pihole.service.clean``
+^^^^^^^^^^^^^^^^^^^^^^^^
+Stops the pihole-FTL service and disables it at boot time.
+
+
+``pihole.tls.clean``
+^^^^^^^^^^^^^^^^^^^^
+Removes TLS configuration from lighttpd.
 
 
 
