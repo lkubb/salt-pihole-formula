@@ -1,8 +1,8 @@
 # vim: ft=sls
 
 {#-
-    Does nothing. PiHole currently cannot be removed without user interaction.
-    Has a depency on `pihole.config.clean`_.
+    **This state will fail.** PiHole currently cannot be removed without user interaction.
+    Has a dependency on `pihole.config.clean`_.
 #}
 
 {%- set tplroot = tpldir.split("/")[0] %}
