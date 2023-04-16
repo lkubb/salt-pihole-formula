@@ -38,7 +38,7 @@ Custom PiHole modules are synced:
   saltutil.sync_all:
     - refresh: true
     - unless:
-      - {{ "pihole" in salt["saltutil.list_extmods"]().get("states", []) }}
+      - '{{ "pihole" in salt["saltutil.list_extmods"]().get("states", []) | lower }}'
 
 {%- if pihole.autoupdate %}
 
