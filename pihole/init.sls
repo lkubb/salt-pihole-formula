@@ -1,5 +1,14 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
+
+{#-
+    *Meta-state*.
+
+    This installs the pihole package,
+    manages the pihole configuration file,
+    adlists, blacklists, custom CNAME and DNS config,
+    groups, whitelists, then starts the pihole-FTL service.
+    Also manages the lighttpd server regarding TLS configuration.
+#}
 
 include:
   - .package

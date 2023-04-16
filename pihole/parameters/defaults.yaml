@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # vim: ft=yaml
 #
 # Set default values.
@@ -11,7 +10,7 @@ values:
       name: pihole-FTL
     config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
     lighttpd_openssl: lighttpd-mod-openssl
-    setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
+    setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh  # yamllint disable-line rule:line-length
   adlists:
     absent: []
     present: []

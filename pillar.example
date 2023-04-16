@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # vim: ft=yaml
 # yamllint disable rule:comments-indentation
 ---
@@ -279,7 +278,7 @@ pihole:
   lookup:
     config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
     lighttpd_openssl: lighttpd-mod-openssl
-    setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
+    setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh  # yamllint disable-line rule:line-length
 
   tofs:
       # The files_switch key serves as a selector for alternative
@@ -306,6 +305,6 @@ pihole:
       # The entries under `source_files` are prepended to the default source files
       # given for the state
     source_files:
-      pihole-config-file-file-managed:
+      PiHole configuration is managed:
         - 'example_alt.tmpl'
         - 'example_alt.tmpl.jinja'

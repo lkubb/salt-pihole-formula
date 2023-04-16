@@ -1,10 +1,13 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
 
-{%- set tplroot = tpldir.split('/')[0] %}
+{#-
+    Removes managed PiHole groups.
+    This does not restart PiHole on its own. To apply, you will need to restart manually.
+#}
+
+{%- set tplroot = tpldir.split("/")[0] %}
 {%- from tplroot ~ "/map.jinja" import mapdata as pihole with context %}
 
-# This does not restart PiHole on its own. To apply, you will need to restart manually.
 {%- if pihole.groups.present %}
 
 PiHole groups are managed:

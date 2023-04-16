@@ -1,8 +1,12 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
 
-{%- set tplroot = tpldir.split('/')[0] %}
-{%- set sls_package_install = tplroot ~ '.package.install' %}
+{#-
+    Configure and enable TLS for PiHole (lighttpd).
+    Has a dependency on `pihole.package`_.
+#}
+
+{%- set tplroot = tpldir.split("/")[0] %}
+{%- set sls_package_install = tplroot ~ ".package.install" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as pihole with context %}
 {%- from tplroot ~ "/libtofs.jinja" import files_switch with context %}
 
@@ -18,14 +22,14 @@ lighttpd openssl module is present:
 lighttpd is setup for TLS:
   file.managed:
     - name: /etc/lighttpd/external.conf
-    - source: {{ files_switch(['tls.conf', 'tls.conf.j2'],
-                              lookup='lighttpd is setup for TLS'
+    - source: {{ files_switch(["tls.conf", "tls.conf.j2"],
+                              lookup="lighttpd is setup for TLS"
                  )
               }}
     - mode: '0644'
     - user: root
     - group: {{ pihole.lookup.rootgroup }}
-    - makedirs: True
+    - makedirs: true
     - template: jinja
     - require:
       - lighttpd openssl module is present

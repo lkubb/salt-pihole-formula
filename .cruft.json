@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/lkubb/salt-template-formula",
-  "commit": "09d23d7be4069023a5dd2201c3db5b82049391a1",
+  "commit": "b9637cb435e5fca3700558fc97df35817894470f",
   "checkout": null,
   "context": {
     "cookiecutter": {
@@ -25,12 +25,12 @@
       "subcomponent": "",
       "subcomponent_config": "",
       "git_username": "lkubb",
-      "_lookup": {
+      "lookup": {
         "setup_sh": "https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh",
         "config_dnsmasq": "/etc/dnsmasq.d/05-salt.conf",
         "lighttpd_openssl": "lighttpd-mod-openssl"
       },
-      "_settings": {
+      "settings": {
         "autoupdate": true,
         "adlists": {
           "absent": [],

@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
 # vim: ft=sls
 
-{%- set tplroot = tpldir.split('/')[0] %}
+{%- set tplroot = tpldir.split("/")[0] %}
 {%- from tplroot ~ "/map.jinja" import mapdata as pihole with context %}
 {%- from tplroot ~ "/libtofs.jinja" import files_switch with context %}
 
 PiHole initial setupVars are present:
   file.managed:
     - name: {{ pihole.lookup.config }}
-    - source: {{ files_switch(['setupVars.conf', 'setupVars.conf.j2'],
-                              lookup='PiHole initial setupVars are present'
+    - source: {{ files_switch(["setupVars.conf", "setupVars.conf.j2"],
+                              lookup="PiHole initial setupVars are present"
                  )
               }}
     - makedirs: true
