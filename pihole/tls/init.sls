@@ -8,7 +8,7 @@
 {%- set tplroot = tpldir.split("/")[0] %}
 {%- set sls_package_install = tplroot ~ ".package.install" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as pihole with context %}
-{%- from tplroot ~ "/libtofs.jinja" import files_switch with context %}
+{%- from tplroot ~ "/libtofsstack.jinja" import files_switch with context %}
 
 include:
   - {{ sls_package_install }}
@@ -22,8 +22,10 @@ lighttpd openssl module is present:
 lighttpd is setup for TLS:
   file.managed:
     - name: /etc/lighttpd/external.conf
-    - source: {{ files_switch(["tls.conf", "tls.conf.j2"],
-                              lookup="lighttpd is setup for TLS"
+    - source: {{ files_switch(
+                    ["tls.conf", "tls.conf.j2"],
+                    config=pihole,
+                    lookup="lighttpd is setup for TLS"
                  )
               }}
     - mode: '0644'

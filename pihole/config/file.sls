@@ -3,7 +3,7 @@
 {%- set tplroot = tpldir.split("/")[0] %}
 {%- set sls_package_install = tplroot ~ ".package.install" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as pihole with context %}
-{%- from tplroot ~ "/libtofs.jinja" import files_switch with context %}
+{%- from tplroot ~ "/libtofsstack.jinja" import files_switch with context %}
 
 include:
   - {{ sls_package_install }}
@@ -11,8 +11,10 @@ include:
 PiHole configuration is managed:
   file.managed:
     - name: {{ pihole.lookup.config }}
-    - source: {{ files_switch(["setupVars.conf", "setupVars.conf.j2"],
-                              lookup="PiHole configuration is managed"
+    - source: {{ files_switch(
+                    ["setupVars.conf", "setupVars.conf.j2"],
+                    config=pihole,
+                    lookup="PiHole configuration is managed",
                  )
               }}
     - mode: '0644'
