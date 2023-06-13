@@ -30,8 +30,10 @@ PiHole configuration is managed:
 PiHole FTL configuration is managed:
   file.managed:
     - name: {{ salt["file.dirname"](pihole.lookup.config) | path_join("pihole-FTL.conf") }}
-    - source: {{ files_switch(["pihole-FTL.conf", "pihole-FTL.conf.j2"],
-                              lookup="PiHole FTL configuration is managed"
+    - source: {{ files_switch(
+                    ["pihole-FTL.conf", "pihole-FTL.conf.j2"],
+                    config=pihole,
+                    lookup="PiHole FTL configuration is managed",
                  )
               }}
     - mode: '0644'
@@ -47,8 +49,10 @@ PiHole FTL configuration is managed:
 Custom dnsmasq configuration is managed:
   file.managed:
     - name: {{ pihole.lookup.config_dnsmasq }}
-    - source: {{ files_switch(["dnsmasq.conf", "dnsmasq.conf.j2"],
-                              lookup="Custom dnsmasq configuration is managed"
+    - source: {{ files_switch(
+                    ["dnsmasq.conf", "dnsmasq.conf.j2"],
+                    config=pihole,
+                    lookup="Custom dnsmasq configuration is managed",
                  )
               }}
     - mode: '0644'
