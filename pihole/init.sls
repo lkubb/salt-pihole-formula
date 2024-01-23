@@ -13,6 +13,7 @@
 include:
   - .package
   - .config
+  - .cert
   - .adlist
   - .blacklist
   - .custom_cname

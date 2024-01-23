@@ -27,3 +27,19 @@
       )
   -%}
 {%- endif -%}
+
+{#-
+    If certificate generation is enabled, automatically enable TLS and
+    set the correct paths.
+- #}
+
+{%- if mapdata.cert.generate %}
+{%-   do mapdata.tls.update(
+        {
+          "enabled": true,
+          "hostname": mapdata.tls.hostname or mapdata.cert.cn or ([grains.fqdn] + grains.fqdns) | reject("==", "localhost.localdomain") | first | d(grains.id),
+          "pemfile": mapdata.lookup.cert.cert,
+          "privkey": mapdata.lookup.cert.privkey,
+        }
+) %}
+{%- endif %}

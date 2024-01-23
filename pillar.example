@@ -31,6 +31,22 @@ pihole:
       plain: []
       regex: []
       wildcard: []
+    # Manage a certificate for the WebUI.
+    # These parameters are passed to x509.certificate_managed.
+  cert:
+      # This needs to be enabled to generate the certificate.
+      # Enabling it also enables tls.enabled and sets required
+      # defaults automatically.
+    generate: false
+    ca_server: null
+    cn: null
+    days_remaining: 3
+    days_valid: 7
+    intermediate: []
+    san: null
+    signing_cert: null
+    signing_policy: null
+    signing_private_key: null
   config:
       # setupVars.conf configuration
     app:
@@ -276,6 +292,9 @@ pihole:
 # debug_extra: false
 
   lookup:
+    cert:
+      cert: /opt/pihole/tls/cert.pem
+      privkey: /opt/pihole/tls/cert.key
     config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
     lighttpd_openssl: lighttpd-mod-openssl
     setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh  # yamllint disable-line rule:line-length

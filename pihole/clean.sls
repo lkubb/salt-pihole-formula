@@ -13,6 +13,7 @@
 
 include:
   - .tls.clean
+  - .cert.clean
   - .service.clean
   - .config.clean
   - .package.clean

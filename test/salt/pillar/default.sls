@@ -1,4 +1,5 @@
 # vim: ft=yaml
+# yamllint disable rule:line-length
 ---
 pihole:
   lookup:
@@ -9,6 +10,9 @@ pihole:
     config: '/etc/pihole/setupVars.conf'
     service:
       name: pihole-FTL
+    cert:
+      cert: /opt/pihole/tls/cert.pem
+      privkey: /opt/pihole/tls/cert.key
     config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
     lighttpd_openssl: lighttpd-mod-openssl
     setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
@@ -25,6 +29,17 @@ pihole:
       plain: []
       regex: []
       wildcard: []
+  cert:
+    ca_server: null
+    cn: null
+    days_remaining: 3
+    days_valid: 7
+    generate: false
+    intermediate: []
+    san: null
+    signing_cert: null
+    signing_policy: null
+    signing_private_key: null
   config:
     app:
       admin_email: ''

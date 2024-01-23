@@ -90,6 +90,12 @@ Manages the PiHole, pihole-FTL and custom dnsmasq configurations.
 Has a dependency on `pihole.package`_.
 
 
+``pihole.cert``
+^^^^^^^^^^^^^^^
+Generates a TLS certificate + key for PiHole.
+Depends on `pihole.package`_.
+
+
 ``pihole.adlist``
 ^^^^^^^^^^^^^^^^^
 Manages PiHole adlists and updates the gravity database.
@@ -160,6 +166,12 @@ Has a dependency on `pihole.config.clean`_.
 ^^^^^^^^^^^^^^^^^^^^^^^
 Removes the PiHole, pihole-FTL and custom dnsmasq configurations and has a
 dependency on `pihole.service.clean`_.
+
+
+``pihole.cert.clean``
+^^^^^^^^^^^^^^^^^^^^^
+Removes generated PiHole TLS certificate + key.
+Depends on `pihole.service.clean`_.
 
 
 ``pihole.adlist.clean``
