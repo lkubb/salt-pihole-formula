@@ -32,6 +32,9 @@
         "cert": {
           "privkey": "/opt/pihole/tls/cert.key",
           "cert": "/opt/pihole/tls/cert.pem"
+        },
+        "lighttpd": {
+          "tls_conf": "/etc/lighttpd/conf-enabled/99-salt_tls.conf"
         }
       },
       "settings": {

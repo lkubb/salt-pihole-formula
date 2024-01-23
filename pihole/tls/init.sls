@@ -21,7 +21,7 @@ lighttpd openssl module is present:
 
 lighttpd is setup for TLS:
   file.managed:
-    - name: /etc/lighttpd/external.conf
+    - name: {{ pihole.lookup.lighttpd.tls_conf }}
     - source: {{ files_switch(
                     ["tls.conf", "tls.conf.j2"],
                     config=pihole,

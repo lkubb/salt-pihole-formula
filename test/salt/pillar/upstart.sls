@@ -14,6 +14,8 @@ pihole:
       cert: /opt/pihole/tls/cert.pem
       privkey: /opt/pihole/tls/cert.key
     config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
+    lighttpd:
+      tls_conf: /etc/lighttpd/conf-enabled/99-salt_tls.conf
     lighttpd_openssl: lighttpd-mod-openssl
     setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
   adlists:

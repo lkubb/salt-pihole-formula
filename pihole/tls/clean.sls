@@ -12,7 +12,7 @@
 
 lighttpd is not setup for TLS:
   file.managed:
-    - name: /etc/lighttpd/external.conf
+    - name: {{ pihole.lookup.lighttpd.tls_conf }}
     - contents: ''
     - mode: '0644'
     - user: root
