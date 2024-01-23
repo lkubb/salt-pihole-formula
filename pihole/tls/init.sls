@@ -7,11 +7,15 @@
 
 {%- set tplroot = tpldir.split("/")[0] %}
 {%- set sls_package_install = tplroot ~ ".package.install" %}
+{%- set sls_cert_managed = tplroot ~ ".cert.managed" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as pihole with context %}
 {%- from tplroot ~ "/libtofsstack.jinja" import files_switch with context %}
 
 include:
   - {{ sls_package_install }}
+{%- if pihole.cert.generate %}
+  - {{ sls_cert_managed }}
+{%- endif %}
 
 {%- if pihole.tls.enabled %}
 
@@ -44,4 +48,7 @@ lighttpd is running:
     - name: lighttpd
     - watch:
       - lighttpd is setup for TLS
+{%-   if pihole.cert.generate %}
+      - sls: {{ sls_cert_managed }}
+{%-   endif %}
 {%- endif %}
