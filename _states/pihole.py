@@ -6,8 +6,10 @@ Manage PiHole with Salt.
 """
 
 import logging
+from collections.abc import Mapping
 
 from salt.exceptions import CommandExecutionError, SaltInvocationError
+from salt.utils.dictdiffer import recursive_diff
 
 log = logging.getLogger(__name__)
 
@@ -125,6 +127,77 @@ def adlist_absent(name):
     return ret
 
 
+def api_password_managed(name=None, pillar=None, password=None):
+    """
+    Make sure the API password is set as specified.
+    If no password is specified, will generate a random
+    one if none has been set to initialize it.
+
+    .. hint::
+        You can still reset it to a chosen one afterwards or pass
+        the empty string ("") to ``password`` to remove it.
+
+    name
+        Irrelevant, only included for technical reasons.
+
+    pillar
+        A pillar path to retrieve the password from.
+        Recommended since it avoids unnecessary cache writes.
+
+    value
+        The plaintext password. Not recommended, use ``pillar`` instead.
+    """
+    ret = {
+        "name": name,
+        "result": True,
+        "comment": "The API password is already set as specified",
+        "changes": {},
+    }
+
+    randomized = False
+
+    try:
+        if pillar:
+            password = __salt__["pillar.get"](pillar)
+        elif password is not None:
+            pass
+        else:
+            password, randomized = (
+                __salt__["random.get_str"](32, punctuation=False),
+                True,
+            )
+
+        if password == "":
+            cur = __salt__["pihole.config_get"]("webserver.api.pwhash")
+            if cur == password:
+                return ret
+            ret["changes"]["added"] = True
+        elif randomized:
+            if __salt__["pihole.config_get"]("webserver.api.pwhash") != "":
+                ret["comment"] = (
+                    "API password has already been initialized, no password specified"
+                )
+            ret["changes"]["randomized"] = True
+        else:
+            if __salt__["pihole.password_api_verify"](password):
+                return ret
+            ret["changes"]["replaced"] = True
+        if __opts__["test"]:
+            ret["result"] = None
+            ret["comment"] = (
+                "Would have " + next(iter(ret["changes"])) + " the app password"
+            )
+            return ret
+        __salt__["pihole.password_api_set"](password)
+        ret["comment"] = next(iter(ret["changes"])).capitalize() + " the app password"
+    except (CommandExecutionError, SaltInvocationError) as err:
+        ret["result"] = False
+        ret["comment"] = str(err)
+        ret["changes"] = {}
+
+    return ret
+
+
 def blacklist(name=None, domains=None, regex=False, wildcard=False):
     """
     Make sure domains are present in PiHole's blacklists.
@@ -194,9 +267,9 @@ def cname(name, target):
         is_correct = target == cur[name] if is_present else True
 
         if is_present and is_correct:
-            ret[
-                "comment"
-            ] = "The custom CNAME record is already present and points to the correct target."
+            ret["comment"] = (
+                "The custom CNAME record is already present and points to the correct target."
+            )
             return ret
 
         if not is_present:
@@ -261,9 +334,9 @@ def cname_absent(name, target=None):
             return ret
 
         if target is not None and cur[name] != target:
-            ret[
-                "comment"
-            ] = "Custom CNAME record exists, but the target does not match. Skipping."
+            ret["comment"] = (
+                "Custom CNAME record exists, but the target does not match. Skipping."
+            )
             return ret
 
         ret["changes"]["removed"] = name
@@ -278,14 +351,54 @@ def cname_absent(name, target=None):
 
         if name in __salt__["pihole.custom_cname_list"]():
             ret["result"] = False
-            ret[
-                "comment"
-            ] = "There were no errors, but the CNAME record is still present."
+            ret["comment"] = (
+                "There were no errors, but the CNAME record is still present."
+            )
             ret["changes"] = {}
 
     except (CommandExecutionError, SaltInvocationError) as e:
         ret["result"] = False
         ret["comment"] = str(e)
+        ret["changes"] = {}
+
+    return ret
+
+
+def _filter_none(data):
+    return {
+        k: _filter_none(v) if isinstance(v, Mapping) else v
+        for k, v in data.items()
+        if v is not None
+    }
+
+
+def config_managed(name, config):
+    """
+    Ensure the configuration is set as specified.
+    """
+    ret = {
+        "name": name,
+        "result": True,
+        "comment": "The config is already set as specified",
+        "changes": {},
+    }
+
+    try:
+        config = _filter_none(config)
+        cur = __salt__["pihole.config_get"]()
+        diff = recursive_diff(cur, config).diffs
+        if not diff:
+            return ret
+        ret["changes"] = diff
+        if __opts__["test"]:
+            ret["result"] = None
+            ret["comment"] = "Would have updated the configuration"
+            return ret
+        __salt__["pihole.config_update"](config)
+        ret["comment"] = "Updated the configuration"
+    except (CommandExecutionError, SaltInvocationError) as err:
+        ret["result"] = False
+        ret["comment"] = str(err)
         ret["changes"] = {}
 
     return ret
@@ -310,9 +423,9 @@ def custom_dns(name, ip):
         is_correct = ip == cur[name] if is_present else True
 
         if is_present and is_correct:
-            ret[
-                "comment"
-            ] = "The custom A/AAAA record is already present and points to the correct IP address."
+            ret["comment"] = (
+                "The custom A/AAAA record is already present and points to the correct IP address."
+            )
             return ret
 
         if not is_present:
@@ -375,9 +488,9 @@ def custom_dns_absent(name, ip=None):
             return ret
 
         if ip is not None and cur[name] != ip:
-            ret[
-                "comment"
-            ] = "Custom A/AAAA record is present, but does not point to the specified IP address. Skipping."
+            ret["comment"] = (
+                "Custom A/AAAA record is present, but does not point to the specified IP address. Skipping."
+            )
             return ret
 
         ret["changes"]["removed"] = name
@@ -392,9 +505,9 @@ def custom_dns_absent(name, ip=None):
 
         if name in __salt__["pihole.custom_dns_list"]():
             ret["result"] = False
-            ret[
-                "comment"
-            ] = "There were no errors, but the A/AAAA record is still present."
+            ret["comment"] = (
+                "There were no errors, but the A/AAAA record is still present."
+            )
             ret["changes"] = {}
 
     except (CommandExecutionError, SaltInvocationError) as e:
@@ -425,7 +538,9 @@ def group(name, enabled=True, description="Managed by Salt"):
 
     try:
         is_present = name in __salt__["pihole.group_list"]()
-        is_enabled = name in __salt__["pihole.group_list"](True) if is_present else False
+        is_enabled = (
+            name in __salt__["pihole.group_list"](True) if is_present else False
+        )
 
         if is_present and is_enabled == enabled:
             ret["comment"] = f"Group is already present and {verb}d"
@@ -541,9 +656,9 @@ def uptodate(name):
 
         if not __salt__["pihole.update_check"]():
             ret["result"] = False
-            ret[
-                "comment"
-            ] = f"There were no errors, but not all PiHole are up to date still. Upgrade output was:\n\n{out}"
+            ret["comment"] = (
+                f"There were no errors, but not all PiHole are up to date still. Upgrade output was:\n\n{out}"
+            )
 
     except (CommandExecutionError, SaltInvocationError) as e:
         ret["result"] = False
@@ -635,28 +750,28 @@ def _domainlist_absent(name, domains, regex, wildcard, blacklist=True):
 
         ret["changes"]["removed"] = changes
         if __opts__["test"]:
-            ret[
-                "comment"
-            ] = "A total of {} domains would have been removed from the {}list.".format(
-                len(changes), which_list
+            ret["comment"] = (
+                "A total of {} domains would have been removed from the {}list.".format(
+                    len(changes), which_list
+                )
             )
             return ret
 
         __salt__[f"pihole.{which_list}list_rm"](
             domains, regex=regex, wildcard=wildcard, now=False
         )
-        ret[
-            "comment"
-        ] = "A total of {} domains have been removed from the {}list.".format(
-            len(changes), which_list
+        ret["comment"] = (
+            "A total of {} domains have been removed from the {}list.".format(
+                len(changes), which_list
+            )
         )
 
         if __salt__["pihole.domainlist_count"](domains, of_type):
             ret["result"] = False
-            ret[
-                "comment"
-            ] = "There were no errors, but still some of the {} present domains could be found of the specified type.".format(
-                len(changes)
+            ret["comment"] = (
+                "There were no errors, but still some of the {} present domains could be found of the specified type.".format(
+                    len(changes)
+                )
             )
             ret["changes"] = {}
 
@@ -700,10 +815,10 @@ def _domainlist_present(name, domains, regex, wildcard, blacklist=True):
 
         ret["changes"]["added"] = changes
         if __opts__["test"]:
-            ret[
-                "comment"
-            ] = "A total of {} domains would have been added to the {}list.".format(
-                len(changes), which_list
+            ret["comment"] = (
+                "A total of {} domains would have been added to the {}list.".format(
+                    len(changes), which_list
+                )
             )
             return ret
 
@@ -716,10 +831,10 @@ def _domainlist_present(name, domains, regex, wildcard, blacklist=True):
 
         if not len(domains) == __salt__["pihole.domainlist_count"](domains, of_type):
             ret["result"] = False
-            ret[
-                "comment"
-            ] = "There were no errors, but still not all {} missing domains could be found of the correct type.".format(
-                len(changes)
+            ret["comment"] = (
+                "There were no errors, but still not all {} missing domains could be found of the correct type.".format(
+                    len(changes)
+                )
             )
             ret["changes"] = {}
 

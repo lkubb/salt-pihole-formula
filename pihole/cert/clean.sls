@@ -19,6 +19,7 @@ PiHole key/cert is absent:
     - names:
       - {{ pihole.lookup.cert.privkey }}
       - {{ pihole.lookup.cert.cert }}
+      - {{ pihole.config.app.webserver.tls.cert }}
     - require:
       - sls: {{ sls_service_clean }}
 {%- endif %}

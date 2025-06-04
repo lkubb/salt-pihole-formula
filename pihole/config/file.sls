@@ -9,44 +9,18 @@ include:
   - {{ sls_package_install }}
 
 PiHole configuration is managed:
-  file.managed:
-    - name: {{ pihole.lookup.config }}
-    - source: {{ files_switch(
-                    ["setupVars.conf", "setupVars.conf.j2"],
-                    config=pihole,
-                    lookup="PiHole configuration is managed",
-                 )
-              }}
-    - mode: '0644'
-    - user: root
-    - group: {{ pihole.lookup.rootgroup }}
-    - makedirs: true
-    - template: jinja
+  pihole.config_managed:
+    - config: {{ pihole.config.app | json }}
     - require:
       - PiHole is installed
-    - context:
-        pihole: {{ pihole | json }}
 
-PiHole FTL configuration is managed:
-  file.managed:
-    - name: {{ salt["file.dirname"](pihole.lookup.config) | path_join("pihole-FTL.conf") }}
-    - source: {{ files_switch(
-                    ["pihole-FTL.conf", "pihole-FTL.conf.j2"],
-                    config=pihole,
-                    lookup="PiHole FTL configuration is managed",
-                 )
-              }}
-    - mode: '0644'
-    - user: root
-    - group: {{ pihole.lookup.rootgroup }}
-    - makedirs: true
-    - template: jinja
-    - require:
-      - PiHole is installed
-    - context:
-        pihole: {{ pihole | json }}
+{#-
+    This is not needed anymore, it can be configured via pihole.toml
+    in misc.dnsmasq_lines. If used anyways, it needs misc.etc_dnsmasq_d enabled.
+#}
 
 Custom dnsmasq configuration is managed:
+{%- if pihole.config.dnsmasq %}
   file.managed:
     - name: {{ pihole.lookup.config_dnsmasq }}
     - source: {{ files_switch(
@@ -64,3 +38,8 @@ Custom dnsmasq configuration is managed:
       - PiHole is installed
     - context:
         pihole: {{ pihole | json }}
+
+{%- else %}
+  file.absent:
+    - name: {{ pihole.lookup.config_dnsmasq }}
+{%- endif %}

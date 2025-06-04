@@ -50,6 +50,13 @@ def __which():
 
 def __virtual__():
     if __which():
+        try:
+            ftl = version()["ftl"]
+        except Exception as err:  # pylint: disable=broad-except
+            return False, f"Failed checking pihole version: {err}"
+        if not re.match(r"v[1-5]\.", ftl):
+            return False, "Only supports PiHole < v6"
+
         return __virtualname__
     return (False, "Could not find `pihole` in your $PATH.")
 

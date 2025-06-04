@@ -4,17 +4,15 @@ _commit: 0.1.0
 _src_path: https://github.com/lkubb/salt-formula-copier
 abbr_pysafe: pihole
 author: lkubb
-config: /etc/pihole/setupVars.conf
-flavor_init: general
+config: /etc/pihole/pihole.toml
 lookup:
   cert:
-    cert: /opt/pihole/tls/cert.pem
-    privkey: /opt/pihole/tls/cert.key
+    cert: /etc/pihole/tls.crt
+    privkey: /etc/pihole/tls.key
   config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
-  lighttpd:
-    tls_conf: /etc/lighttpd/conf-enabled/99-salt_tls.conf
-  lighttpd_openssl: lighttpd-mod-openssl
+  group: pihole
   setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh
+  user: pihole
 needs_repo: false
 pkg: ''
 service: pihole-FTL
@@ -35,59 +33,204 @@ settings:
       regex: []
       wildcard: []
   cert:
+    algo: rsa
     ca_server: null
     cn: null
     days_remaining: 3
     days_valid: 7
     generate: false
     intermediate: []
+    keysize: 2048
     san: null
     signing_cert: null
     signing_policy: null
     signing_private_key: null
   config:
     app:
-      admin_email: ''
-      api_exclude_clients: []
-      api_exclude_domains: []
-      api_query_log_show: all
-      blocking_enabled: true
-      cache_size: 10000
+      database:
+        DBimport: true
+        DBinterval: 60
+        maxDBdays: 91
+        network:
+          expire: 91
+          parseARPcache: true
+        useWAL: true
+      debug:
+        aliasclients: false
+        all: false
+        api: false
+        arp: false
+        caps: false
+        clients: false
+        config: false
+        database: false
+        dnssec: false
+        edns0: false
+        events: false
+        extra: false
+        flags: false
+        gc: false
+        helper: false
+        inotify: false
+        locks: false
+        netlink: false
+        networking: false
+        ntp: false
+        overtime: false
+        queries: false
+        regex: false
+        reserved: false
+        resolver: false
+        shmem: false
+        status: false
+        tls: false
+        vectors: false
+        webserver: false
       dhcp:
         active: false
-        domain: null
-        end: null
-        ipv6: null
-        leasetime: null
-        rapid_commit: null
-        router: null
-        start: null
-      dns_bogus_priv: true
-      dns_fqdn_required: true
-      dns_upstream:
-        - 1.1.1.1
-        - 1.0.0.1
-      dnsmasq_listening: local
-      dnssec: false
-      install_web_interface: true
-      install_web_server: true
-      ipv4_address: null
-      ipv6_address: null
-      lighttpd_enabled: true
-      pihole_interface: null
-      query_logging: true
-      rev_server:
-        cidr: null
-        domain: null
-        enabled: false
-        target: null
-      webpassword: null
-      webpassword_pillar: null
-      webtheme: default
-      webuiboxedlayout: boxed
+        end: ''
+        hosts: []
+        ignoreUnknownClients: false
+        ipv6: false
+        leaseTime: ''
+        logging: false
+        multiDNS: false
+        netmask: ''
+        rapidCommit: false
+        router: ''
+        start: ''
+      dns:
+        CNAMEdeepInspect: true
+        EDNS0ECS: true
+        analyzeOnlyAandAAAA: false
+        blockESNI: true
+        blockTTL: 2
+        blocking:
+          active: true
+          edns: TEXT
+          mode: 'NULL'
+        bogusPriv: true
+        cache:
+          optimizer: 3600
+          size: 10000
+          upstreamBlockedTTL: 86400
+        cnameRecords: null
+        dnssec: false
+        domain: lan
+        domainNeeded: true
+        expandHosts: true
+        hostRecord: ''
+        hosts: null
+        ignoreLocalhost: false
+        interface: null
+        listeningMode: LOCAL
+        piholePTR: PI.HOLE
+        port: 53
+        queryLogging: true
+        rateLimit:
+          count: 1000
+          interval: 60
+        reply:
+          blocking:
+            IPv4: ''
+            IPv6: ''
+            force4: false
+            force6: false
+          host:
+            IPv4: ''
+            IPv6: ''
+            force4: false
+            force6: false
+        replyWhenBusy: ALLOW
+        revServers: []
+        showDNSSEC: true
+        specialDomains:
+          designatedResolver: true
+          iCloudPrivateRelay: true
+          mozillaCanary: true
+        upstreams:
+          - 1.1.1.1
+          - 1.0.0.1
+      files:
+        database: /etc/pihole/pihole-FTL.db
+        gravity: /etc/pihole/gravity.db
+        gravity_tmp: /tmp
+        log:
+          dnsmasq: /var/log/pihole/pihole.log
+          ftl: /var/log/pihole/FTL.log
+          webserver: /var/log/pihole/webserver.log
+        macvendor: /etc/pihole/macvendor.db
+        pcap: ''
+        pid: /run/pihole-FTL.pid
+      misc:
+        addr2line: true
+        check:
+          disk: 90
+          load: true
+          shmem: 90
+        delay_startup: 0
+        dnsmasq_lines: []
+        etc_dnsmasq_d: false
+        extraLogging: false
+        nice: -10
+        privacylevel: 0
+        readOnly: false
+      ntp:
+        ipv4:
+          active: true
+          address: ''
+        ipv6:
+          active: true
+          address: ''
+        sync:
+          active: true
+          count: 8
+          interval: 3600
+          rtc:
+            device: ''
+            set: false
+            utc: true
+          server: pool.ntp.org
+      resolver:
+        networkNames: true
+        refreshNames: IPV4_ONLY
+        resolveIPv4: true
+        resolveIPv6: true
+      webserver:
+        acl: ''
+        api:
+          allow_destructive: true
+          app_pwhash: null
+          app_sudo: false
+          cli_pw: true
+          client_history_global_max: true
+          excludeClients: []
+          excludeDomains: []
+          maxClients: 10
+          maxHistory: 86400
+          max_sessions: 16
+          prettyJSON: false
+          pwhash: null
+          temp:
+            limit: 60.0
+            unit: C
+        domain: pi.hole
+        interface:
+          boxed: true
+          theme: default-auto
+        paths:
+          prefix: ''
+          webhome: /admin/
+          webroot: /var/www/html
+        port: 80o,443os,[::]:80o,[::]:443os
+        serve_all: false
+        session:
+          restore: true
+          timeout: 1800
+        threads: 50
+        tls:
+          cert: /etc/pihole/tls.pem
     dnsmasq: {}
-    ftl:
-      privacylevel: 0
   custom_cname:
     absent: []
     present: {}
@@ -97,12 +240,13 @@ settings:
   groups:
     absent: []
     present: []
-  tls:
-    enabled: false
-    hostname: ''
-    hsts: false
-    pemfile: ''
-    privkey: ''
+  secrets:
+    api_password:
+      pillar: null
+      plaintext: null
+    totp_secret:
+      pillar: null
+      plaintext: null
   whitelist:
     absent:
       plain: []

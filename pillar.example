@@ -14,6 +14,23 @@ pihole:
       # - https://some.ad.list
       # - https://some.other-ad.list: false
     present: []
+<<<<<<< before updating
+    # Manage the PiHole API password
+  api_password:
+      # Set this to a pillar path (parameter to pillar.get).
+      # Preferred, since it avoids unnecessary cache writes.
+    pillar: null
+      # The plaintext password, alternative to pillar.
+      # Avoid this, unless you want to remove the API password by
+      # setting this to an empty string.
+    plaintext: null
+||||||| last update
+  api_password:
+    pillar: null
+    plaintext: null
+=======
+>>>>>>> after updating
+  autoupdate: true
     # Manage PiHole blacklist entries.
   blacklist:
       # Domains that should be absent from the blacklist.
@@ -38,87 +55,226 @@ pihole:
       # Enabling it also enables tls.enabled and sets required
       # defaults automatically.
     generate: false
+    algo: rsa
     ca_server: null
     cn: null
     days_remaining: 3
     days_valid: 7
     intermediate: []
+    keysize: 2048
     san: null
     signing_cert: null
     signing_policy: null
     signing_private_key: null
   config:
-      # setupVars.conf configuration
+      # pihole.toml configuration
     app:
-      admin_email: ''
-        # Exclude these clients from statistics
-      api_exclude_clients: []
-        # Exclude these domains from statistics
-      api_exclude_domains: []
-        # all, permittedonly, blockedonly, nothing
-      api_query_log_show: all
-      blocking_enabled: true
-      cache_size: 10000
+      database:
+        DBimport: true
+        DBinterval: 60
+        maxDBdays: 91
+        network:
+          expire: 91
+          parseARPcache: true
+        useWAL: true
+      debug:
+        aliasclients: false
+        all: false
+        api: false
+        arp: false
+        caps: false
+        clients: false
+        config: false
+        database: false
+        dnssec: false
+        edns0: false
+        events: false
+        extra: false
+        flags: false
+        gc: false
+        helper: false
+        inotify: false
+        locks: false
+        netlink: false
+        networking: false
+        ntp: false
+        overtime: false
+        queries: false
+        regex: false
+        reserved: false
+        resolver: false
+        shmem: false
+        status: false
+        tls: false
+        vectors: false
+        webserver: false
       dhcp:
         active: false
-          # PIHOLE_DOMAIN ~ search domain
-        domain: null
           # DHCP range end (CIDR)
-        end: null
+        end: ''
+        hosts: []
+        ignoreUnknownClients: false
           # enable IPv6 support (SLAAC + RA). true/false
-        ipv6: null
+        ipv6: false
+        leasetime: ''
           # [h]
-        leasetime: null
+        leaseTime: ''
+        logging: false
+        multiDNS: false
+        netmask: ''
           # Enable DHCPv4 rapid commit (fast address assignment)
-        rapid_commit: null
+        rapidCommit: false
           # gateway IP address
-        router: null
+        router: ''
           # DHCP range start (CIDR)
-        start: null
-        # Never forward reverse lookups for private IP ranges
-      dns_bogus_priv: true
-        # Never forward non-FQDN A and AAAA queries
-      dns_fqdn_required: true
-        # Upstream DNS servers
-      dns_upstream:
-        - 1.1.1.1
-        - 1.0.0.1
-        # Interface settings: local, single, bind, all
-      dnsmasq_listening: local
-      dnssec: false
-      install_web_interface: true
-      install_web_server: true
-        # PiHole IPv4 address
-      ipv4_address: null
-        # PiHole IPv6 address
-      ipv6_address: null
-        # Enable web interface HTTP server
-      lighttpd_enabled: true
-        # PiHole interface
-      pihole_interface: null
-      query_logging: true
+        start: ''
+      dns:
+        CNAMEdeepInspect: true
+        EDNS0ECS: true
+        analyzeOnlyAandAAAA: false
+        blockESNI: true
+        blockTTL: 2
+        blocking:
+          active: true
+          edns: TEXT
+          mode: 'NULL'
+          # Never forward reverse lookups for private IP ranges
+        bogusPriv: true
+        cache:
+          optimizer: 3600
+          size: 10000
+          upstreamBlockedTTL: 86400
+        cnameRecords: null
+        dnssec: false
+          # ~ search domain
+        domain: lan
+          # Never forward non-FQDN A and AAAA queries
+        domainNeeded: true
+          # Never forward non-FQDN A and AAAA queries
+        expandHosts: true
+        hostRecord: ''
+        hosts: null
+        ignoreLocalhost: false
+          # PiHole interface
+        interface: null
+          # Interface settings: local, single, bind, all
+        listeningMode: LOCAL
+        piholePTR: PI.HOLE
+        port: 53
+        queryLogging: true
+        rateLimit:
+          count: 1000
+          interval: 60
+        reply:
+          blocking:
+            IPv4: ''
+            IPv6: ''
+            force4: false
+            force6: false
+          host:
+            IPv4: ''
+            IPv6: ''
+            force4: false
+            force6: false
+        replyWhenBusy: ALLOW
         # Conditional forwarding
-      rev_server:
-        cidr: null
-        domain: null
-        enabled: false
-        target: null
-        # Empty string to disable, unspecified for random.
-        # If specified, needs to be sha256(sha256(<password>)).
-      webpassword: null
-        # Pillar key where to look up webpassword
-        # (will be hashed automatically, so should be plaintext)
-      webpassword_pillar: null
-      webtheme: default
-        # Use boxed layout (for large screens). boxed, traditional
-      webuiboxedlayout: boxed
+        revServers: []
+        showDNSSEC: true
+        specialDomains:
+          designatedResolver: true
+          iCloudPrivateRelay: true
+          mozillaCanary: true
+          # Upstream DNS servers
+        upstreams:
+          - 1.1.1.1
+          - 1.0.0.1
+      files:
+        database: /etc/pihole/pihole-FTL.db
+        gravity: /etc/pihole/gravity.db
+        gravity_tmp: /tmp
+        log:
+          dnsmasq: /var/log/pihole/pihole.log
+          ftl: /var/log/pihole/FTL.log
+          webserver: /var/log/pihole/webserver.log
+        macvendor: /etc/pihole/macvendor.db
+        pcap: ''
+        pid: /run/pihole-FTL.pid
+      misc:
+        addr2line: true
+        check:
+          disk: 90
+          load: true
+          shmem: 90
+        delay_startup: 0
+        dnsmasq_lines: []
+        etc_dnsmasq_d: false
+        extraLogging: false
+        nice: -10
+        privacylevel: 0
+        readOnly: false
+      ntp:
+        ipv4:
+          active: true
+          address: ''
+        ipv6:
+          active: true
+          address: ''
+        sync:
+          active: true
+          count: 8
+          interval: 3600
+          rtc:
+            device: ''
+            set: false
+            utc: true
+          server: pool.ntp.org
+      resolver:
+        networkNames: true
+        refreshNames: IPV4_ONLY
+        resolveIPv4: true
+        resolveIPv6: true
+      webserver:
+        acl: ''
+        api:
+          allow_destructive: true
+          app_pwhash: null
+          app_sudo: false
+          cli_pw: true
+          client_history_global_max: true
+            # Exclude these clients from statistics
+          excludeClients: []
+            # Exclude these domains from statistics
+          excludeDomains: []
+          maxClients: 10
+          maxHistory: 86400
+          max_sessions: 16
+          prettyJSON: false
+            # If specified, needs to be the BALLOON-SHA256 hash of the password.
+            # If left unspecified, a random one is generated (not saved in plaintext).
+            # If set to an empty string, no password is generated.
+          pwhash: null
+          temp:
+            limit: 60.0
+            unit: C
+        domain: pi.hole
+        interface:
+            # Use boxed layout (for large screens). boxed, traditional
+          boxed: true
+          theme: default-auto
+        paths:
+          prefix: ''
+          webhome: /admin/
+          webroot: /var/www/html
+        port: 80o,443os,[::]:80o,[::]:443os
+        serve_all: false
+        session:
+          restore: true
+          timeout: 1800
+        threads: 50
+        tls:
+          cert: /etc/pihole/tls.pem
       # Custom overrides for dnsmasq.
     dnsmasq: {}
-      # pihole-FTL configuration. See below for overview or
-      # https://docs.pi-hole.net/ftldns/configfile/ for reference.
-    ftl:
-        # This is the default setting. Description see below.
-      privacylevel: 0
     # Manage custom CNAME records.
   custom_cname:
       # List of domains that should not have a custom CNAME record.
@@ -150,12 +306,21 @@ pihole:
       # - children
       # - wife: false
     present: []
-  tls:
-    enabled: false
-    hostname: ''
-    hsts: false
-    pemfile: ''
-    privkey: ''
+  secrets:
+      # Manage the PiHole API password
+    api_password:
+        # Set this to a pillar path (parameter to pillar.get).
+        # Preferred, since it avoids unnecessary cache writes.
+      pillar: null
+        # The plaintext password, alternative to pillar.
+        # Avoid this, unless you want to remove the API password by
+        # setting this to an empty string.
+      plaintext: null
+      # This should not be managed via the app.config since the API
+      # does not return it, so it will cause repeated changes.
+    totp_secret:
+      pillar: null
+      plaintext: null
     # Manage PiHole whitelist entries.
     # For description, see blacklist above.
   whitelist:
@@ -168,138 +333,14 @@ pihole:
       regex: []
       wildcard: []
 
-#########################################################
-# Overview of FTL configuration values:
-#   # How should FTL reply to blocked queries?
-#   # NULL|IP-NODATA-AAAA|IP|NXDOMAIN
-# blockingmode: null
-#   # Deep CNAME inspection (disable for very low-end devices)
-# cname_deep_inspect: true
-#   # reply NXDOMAIN to _esni. subdomains of blocked domains
-# block_esni: true
-#   # overwrite the query source when client information is provided
-#   # through EDNS0 client subnet (ECS) information
-# edns0_ecs: true
-#   # permit no more than x queries in y seconds per client
-# rate_limit: 1000/60
-#   # Fix A/AAAA reply for `pi.hole` etc.
-# local_ipv4: ''
-# local_ipv6: ''
-#   # Fix A/AAAA reply for blocked domains when IP blocking mode is used
-# block_ipv4: ''
-# block_ipv6: ''
-#   # Reply behavior when the gravity database is locked/busy
-#   # DROP|ALLOW|BLOCK|REFUSE
-# reply_when_busy: DROP
-#   # Cause Firefox to disable automatic DNS-over-HTTP
-# mozilla_canary: true
-#   # TTL to be handed out for blocked queries
-# block_ttl: 2
-#   # Cause Apple devices to disable iCloud Private Relay
-# block_icloud_pr: true
-#   # hours of queries to import from the database and logs
-#   # >24h requires a changed compile-time value
-# maxlogage: '24.0'
-#   # 0 show everything 1 hide domains 2 + hide clients 3 hide everything
-# privacylevel: 0
-#   # Should FTL ignore queries coming from the local machine?
-#   # no|yes
-# ignore_localhost: 'no'
-# analyze_only_a_and_aaaa: false
-#   # Should FTL analyze and include automatically generated DNSSEC
-#   # queries in the Query Log?
-# show_dnssec: true
-#   # localonly|all
-# socket_listening: localonly
-# ftlport: 4711
-#   # Should FTL try to resolve IPv4/6 addresses to hostnames?
-#   # yes|no
-# resolve_ipv4: 'yes'
-# resolve_ipv6: 'yes'
-#   # Controls whether and how FTL will reply for address for which
-#   # a local interface exists
-#   # PI.HOLE|HOSTNAME|HOSTNAMEFQDN|NONE
-# pihole_ptr: PI.HOLE
-#   # if network interfaces appear only late during system startup
-#   # 0-300 [s]
-# delay_startup: 0
-#   # Process priority. [-20, 19]. Disable: -999
-# nice: -10
-#   # Remove IP addresses older than the specified number of days
-#   # Defaults to MAXDBDAYS
-# maxnetage: null
-#   # use the fallback option to try to obtain client names from
-#   # checking the network table
-# names_from_netdb: true
-#   # Influence hourly PTR requests which check for
-#   # changes in client and upstream server hostnames
-#   # IPV4|ALL|UNKNOWN|NONE
-# refresh_hostnames: IPV4
-#   # When disabled, client identification and the network table
-#   # will stop working reliably
-# parse_arp_cache: true
-#   # FTL by default regularly checks the system load and warns if too high
-# check_load: true
-#   # By default, FTL warns if the shared-memory usage exceeds 90%.
-#   # [%]
-# check_shmem: 90
-#   # By default, FTL warns if usage of the disk holding any crucial file exceeds 90%.
-#   # [%]
-# check_disk: 90
-#   # Should FTL load information from the database on startup
-#   # to be aware of the most recent history?
-#   # yes|no
-# dbimport: 'yes'
-#   # How long should queries be stored in the database?
-#   # Setting this to 0 disables the database
-# maxdbdays: 365
-#   # How often do we store queries in FTL's database [minutes]?
-# dbinterval: '1.0'
-#   # Specify the path and filename of FTL's SQLite3 long-term database.
-#   # Setting this to DBFILE= disables the database altogether
-# dbfile: /etc/pihole/pihole-FTL.db
-#   # Other relevant paths
-# logfile: /var/log/pihole/FTL.log
-# pidfile: /run/pihole-FTL.pid
-# portfile: /run/pihole-FTL.port
-# socketfile: /run/pihole/FTL.sock
-# setupvarsfile: /etc/pihole/setupVars.conf
-# macvendordb: /etc/pihole/macvendor.db
-# gravitydb: /etc/pihole/gravity.db
-#   # Debug configuration
-# debug_all: false
-# debug_database: false
-# debug_networking: false
-# debug_edns0: false
-# debug_locks: false
-# debug_queries: false
-# debug_flags: false
-# debug_shmem: false
-# debug_gc: false
-# debug_arp: false
-# debug_regex: false
-# debug_api: false
-# debug_overtime: false
-# debug_status: false
-# debug_caps: false
-# debug_dnsmasq_lines: false
-# debug_vectors: false
-# debug_resolver: false
-# debug_clients: false
-# debug_aliasclients: false
-# debug_events: false
-# debug_helper: false
-# debug_extra: false
-
   lookup:
     cert:
-      cert: /opt/pihole/tls/cert.pem
-      privkey: /opt/pihole/tls/cert.key
-    lighttpd:
-      tls_conf: /etc/lighttpd/conf-enabled/99-salt_tls.conf
+      cert: /etc/pihole/tls.crt
+      privkey: /etc/pihole/tls.key
     config_dnsmasq: /etc/dnsmasq.d/05-salt.conf
-    lighttpd_openssl: lighttpd-mod-openssl
+    group: pihole
     setup_sh: https://raw.githubusercontent.com/pi-hole/pi-hole/master/automated%20install/basic-install.sh  # yamllint disable-line rule:line-length
+    user: pihole
 
   tofs:
       # The files_switch key serves as a selector for alternative

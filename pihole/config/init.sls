@@ -6,4 +6,5 @@
 #}
 
 include:
+  - .password
   - .file
