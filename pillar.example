@@ -14,23 +14,6 @@ pihole:
       # - https://some.ad.list
       # - https://some.other-ad.list: false
     present: []
-<<<<<<< before updating
-    # Manage the PiHole API password
-  api_password:
-      # Set this to a pillar path (parameter to pillar.get).
-      # Preferred, since it avoids unnecessary cache writes.
-    pillar: null
-      # The plaintext password, alternative to pillar.
-      # Avoid this, unless you want to remove the API password by
-      # setting this to an empty string.
-    plaintext: null
-||||||| last update
-  api_password:
-    pillar: null
-    plaintext: null
-=======
->>>>>>> after updating
-  autoupdate: true
     # Manage PiHole blacklist entries.
   blacklist:
       # Domains that should be absent from the blacklist.
@@ -319,7 +302,20 @@ pihole:
       # This should not be managed via the app.config since the API
       # does not return it, so it will cause repeated changes.
     totp_secret:
+        # Force overwriting existing TOTP secrets to match what
+        # was specified. Set this to false to protect an already
+        # initialized 2FA setup.
+      force: true
+        # If you need to sync the TOTP secret between multiple servers,
+        # you can specify an explicit externally generated secret.
+        # For a single server setup, just leave everything alone and
+        # a random secret is generated once.
+        # Set this to a pillar path (parameter to pillar.get).
+        # Preferred, since it avoids unnecessary cache writes.
       pillar: null
+        # The plaintext secret, alternative to pillar.
+        # Avoid this, unless you want to remove the 2FA enforcement by
+        # setting this to an empty string.
       plaintext: null
     # Manage PiHole whitelist entries.
     # For description, see blacklist above.

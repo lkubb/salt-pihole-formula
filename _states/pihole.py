@@ -131,7 +131,7 @@ def api_password_managed(name=None, pillar=None, password=None):
     """
     Make sure the API password is set as specified.
     If no password is specified, will generate a random
-    one if none has been set to initialize it.
+    one if none has been set in another way to initialize it.
 
     .. hint::
         You can still reset it to a chosen one afterwards or pass
@@ -159,29 +159,29 @@ def api_password_managed(name=None, pillar=None, password=None):
     try:
         if pillar:
             password = __salt__["pillar.get"](pillar)
-        elif password is not None:
-            pass
-        else:
-            password, randomized = (
-                __salt__["random.get_str"](32, punctuation=False),
-                True,
-            )
+        elif password is None:
+            randomized = True
 
         if password == "":
-            cur = __salt__["pihole.config_get"]("webserver.api.pwhash")
-            if cur == password:
+            if not __salt__["pihole.config_get"]("webserver.api.pwhash"):
+                ret["comment"] = "The password is already unset as specified"
                 return ret
-            ret["changes"]["added"] = True
+            ret["changes"]["removed"] = True
         elif randomized:
             if __salt__["pihole.config_get"]("webserver.api.pwhash") != "":
                 ret["comment"] = (
                     "API password has already been initialized, no password specified"
                 )
+                return ret
+            password = __salt__["random.get_str"](32, punctuation=False)
             ret["changes"]["randomized"] = True
         else:
             if __salt__["pihole.password_api_verify"](password):
                 return ret
-            ret["changes"]["replaced"] = True
+            if __salt__["pihole.config_get"]("webserver.api.pwhash"):
+                ret["changes"]["replaced"] = True
+            else:
+                ret["changes"]["added"] = True
         if __opts__["test"]:
             ret["result"] = None
             ret["comment"] = (
@@ -375,6 +375,10 @@ def _filter_none(data):
 def config_managed(name, config):
     """
     Ensure the configuration is set as specified.
+
+    .. hint::
+        Don't manage ``webserver.api.totp_secret`` with this state. If you do,
+        the state will always report changes. Use ``pihole.totp_secret_managed`` instead.
     """
     ret = {
         "name": name,
@@ -626,6 +630,86 @@ def group_absent(name):
     except (CommandExecutionError, SaltInvocationError) as e:
         ret["result"] = False
         ret["comment"] = str(e)
+        ret["changes"] = {}
+
+    return ret
+
+
+def totp_secret_managed(name=None, pillar=None, secret=None, force=True):
+    """
+    Make sure the TOTP secret is set as specified.
+    If no secret is specified, will generate a random
+    one if none has been set in another way to initialize it.
+
+    .. hint::
+        You can still reset it to a chosen one afterwards or pass
+        the empty string ("") to ``secret`` to remove it.
+
+    name
+        Irrelevant, only included for technical reasons.
+
+    pillar
+        A pillar path to retrieve the secret from.
+        Recommended since it avoids unnecessary cache writes.
+
+    value
+        The plaintext secret. Not recommended, use ``pillar`` instead.
+
+    force
+        Replace an existing TOTP secret. Defaults to true.
+
+        .. warning::
+            Regenerating a TOTP secret invalidates all currently setup authenticator apps.
+            Set this to false to avoid that situation.
+    """
+    ret = {
+        "name": name,
+        "result": True,
+        "comment": "The TOTP secret is already set as specified",
+        "changes": {},
+    }
+
+    try:
+        if pillar:
+            secret = __salt__["pillar.get"](pillar, ...)
+            if secret is ...:
+                raise CommandExecutionError(
+                    f"Specified pillar path {pillar} is unavailable"
+                )
+
+        if secret == "":
+            if not __salt__["pihole.totp_secret_isset"]():
+                ret["comment"] = "The TOTP secret is already unset as specified"
+                return ret
+            ret["changes"]["removed"] = True
+        elif secret is None:
+            if __salt__["pihole.totp_secret_isset"]():
+                ret["comment"] = (
+                    "TOTP secret has already been initialized, no secret specified"
+                )
+            ret["changes"]["randomized"] = True
+        elif __salt__["pihole.totp_secret_verify"](secret):
+            return ret
+        else:
+            if __salt__["pihole.totp_secret_isset"]():
+                ret["changes"]["replaced"] = True
+            else:
+                ret["changes"]["added"] = True
+        if "replaced" in ret["changes"] and not force:
+            raise CommandExecutionError(
+                "Existing TOTP secret is set to be changed, but force is set to false. Pass force: true to override"
+            )
+        if __opts__["test"]:
+            ret["result"] = None
+            ret["comment"] = (
+                "Would have " + next(iter(ret["changes"])) + " the TOTP secret"
+            )
+            return ret
+        __salt__["pihole.totp_secret_set"](secret, force=force)
+        ret["comment"] = next(iter(ret["changes"])).capitalize() + " the TOTP secret"
+    except (CommandExecutionError, SaltInvocationError) as err:
+        ret["result"] = False
+        ret["comment"] = str(err)
         ret["changes"] = {}
 
     return ret

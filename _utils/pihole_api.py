@@ -1,6 +1,7 @@
 import copy
 import logging
 import random
+import subprocess
 import time
 from itertools import takewhile
 from pathlib import Path
@@ -12,6 +13,7 @@ import salt.utils.dictupdate
 import salt.utils.event
 import salt.utils.json
 import salt.utils.network
+import salt.utils.path
 from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import ConnectionError
 from salt.exceptions import CommandExecutionError
@@ -102,7 +104,7 @@ def query(
             session=session,
             **kwargs,
         )
-    except PiHoleAPIPermissionDeniedError:
+    except (PiHoleAPIAuthRequiredError, PiHoleAPISessionExpired):
         if not _check_clear(client, config):
             raise
 
@@ -131,7 +133,7 @@ def _check_clear(client, config):
         session = client.auth.get_session()
         if session.auth_type and session.auth_type != config["auth"]["method"]:
             return True
-    except PiHoleAPISessionExpired:
+    except (PiHoleAPIAuthRequiredError, PiHoleAPISessionExpired):
         return True
     return False
 
@@ -197,7 +199,13 @@ def get_authd_client(opts, context, get_config=False):
         )
     ):
         log.debug("Renewing session")
-        client.session_renew()
+        try:
+            # A valid session might have expired on the server, which would
+            # yield a PiHoleAPIAuthRequiredError afaict
+            client.session_renew()
+        except (PiHoleAPIAuthRequiredError, PiHoleAPISessionExpired):
+            clear_cache(opts, context, session=True)
+            client, config, retry = try_build()
 
     # Check if the current session could not be renewed for a sufficient amount of time.
     if not retry and not client.session_valid(
@@ -242,13 +250,14 @@ def _build_authd_client(opts):
         flush_exception=PiHoleAPISessionExpired,
     )
 
-    client = None
+    client = totp = None
 
     if config["auth"]["method"] == "session":
         auth = PiHoleAPISessionAuth(session=embedded_session, cache=session_cache)
     else:
         if config["auth"]["method"] == "password":
             password = config["auth"]["password"]
+            totp = config["auth"]["totp"]
         elif config["auth"]["method"] == "cli":
             if not CLI_PW_PATH.is_file():
                 raise CommandExecutionError(
@@ -268,6 +277,7 @@ def _build_authd_client(opts):
             config["auth"]["method"],
             cache=None,
             session_store=session_auth,
+            totp=totp,
         )
     client = AuthenticatedPiHoleAPIClient(
         auth, session=unauthd_client.session, **config["server"], **config["client"]
@@ -681,11 +691,19 @@ class PiHoleAPIPasswordAuth:
     Fetches sessions from a (CLI/App/General) password.
     """
 
-    def __init__(self, password, client, auth_type, cache=None, session_store=None):
+    def __init__(
+        self, password, client, auth_type, cache=None, session_store=None, totp=None
+    ):
         self.password = password
         self.client = client
         self.auth_type = auth_type
         self.cache = cache
+        self.totp = totp
+        self._pihole_ftl = salt.utils.path.which("pihole-FTL")
+        if self.totp is True and not self._pihole_ftl:
+            raise PiHoleAPIInvocationError(
+                "2FA via locally generated TOTP token was enabled in the config, but could not find pihole-FTL binary"
+            )
         if session_store is None:
             session_store = PiHoleAPISessionAuth()
         self.session = session_store
@@ -719,13 +737,55 @@ class PiHoleAPIPasswordAuth:
         """
         self.session.update_session(auth)
 
+    def _get_payload(self, force_local_totp=False):
+        payload = {"password": self.password}
+        if self.totp is True or force_local_totp:
+            out = subprocess.run(
+                (
+                    self._pihole_ftl,
+                    "--totp",
+                ),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if out.returncode != 0:
+                if force_local_totp:
+                    raise CommandExecutionError(
+                        "Need TOTP configuration in pihole:auth:totp"
+                    )
+                raise CommandExecutionError(
+                    f"Failed generating TOTP token: {out.stderr}"
+                )
+            payload["totp"] = int(out.stdout.strip())
+        elif self.totp:
+            # TODO: This is not very helpful currently, at least needs a config.get call somewhere
+            # and should not be cached.
+            payload["totp"] = int(self.totp)
+        return payload
+
     def _login(self):
         log.debug(
             "PiHole API session expired. Recreating one by authenticating with password."
         )
-        payload = {"password": self.password}
-        res = self.client.post("auth", payload=payload)["session"]
+        payload = self._get_payload()
+        try:
+            res = self.client.post("auth", payload=payload)["session"]
+        except PiHoleAPIInvocationError as err:
+            if "No 2FA token found in JSON payload" not in str(err):
+                raise
+            # Password requires TOTP token, let's try to YOLO-generate one locally
+            log.warning(
+                "Need TOTP configuration in pihole:auth:totp, trying to generate locally"
+            )
+            payload = self._get_payload(force_local_totp=True)
+            res = self.client.post("auth", payload=payload)["session"]
+
+        # TODO: I noticed this call does not (reliably?) work as expected directly after authentication,
+        # but then noticed the part that fails (details lookup) likely isn't actually
+        # useful anymore, unless we need the internal ID.
         info = self.client.session_lookup(res["sid"])
+
         self.session.replace_session(PiHoleAPISession(**info, auth_type=self.auth_type))
         return self.session.get_session()
 
@@ -808,13 +868,14 @@ def parse_config(config, validate=True):
             # that is generated by default (but can be disabled).
             # Other possibilities are:
             # * app (generate a new app password, needs to be able to write to /etc/pihole/pihole.toml)
-            # * password (specify a static [app] password as separate "password")
+            # * password (specify a static [app] password as separate "password"), regular passwords might need a TOTP token
             # * session (specify a SID as separate "session_id")
             "method": "cli",
             "session_lifecycle": {
                 "minimum_ttl": 120,
                 "renew": True,
             },
+            "totp": None,
         },
         "cache": {
             "backend": "disk",
@@ -1409,7 +1470,8 @@ class PiHoleAPIClient:
         except PiHoleAPIAuthRequiredError:
             misc = {}
             log.warning(
-                "Using cli_pw or restricted app password, some functions might crash"
+                "Likely using cli_pw or restricted app password, some functions might crash. "
+                "If this is a freshly logged in regular session, you can ignore this message"
             )
         core.pop("message", None)
         misc.update(core)
@@ -1585,7 +1647,11 @@ class AuthenticatedPiHoleAPIClient(PiHoleAPIClient):
         endpoint = "auth"
         try:
             self.delete(endpoint, session=session)
-        except (PiHoleAPIPermissionDeniedError, PiHoleAPINotFoundError):
+        except (
+            PiHoleAPIAuthRequiredError,
+            PiHoleAPIPermissionDeniedError,
+            PiHoleAPINotFoundError,
+        ):
             # if we're trying to revoke ourselves and this happens,
             # the session was already invalid
             if session:

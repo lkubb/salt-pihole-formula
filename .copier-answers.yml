@@ -245,6 +245,7 @@ settings:
       pillar: null
       plaintext: null
     totp_secret:
+      force: true
       pillar: null
       plaintext: null
   whitelist:

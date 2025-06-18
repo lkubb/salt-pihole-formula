@@ -12,6 +12,7 @@ For these functions, this module needs the sqlite3 library.
 
 import logging as logging_
 import re
+import secrets
 import shlex
 from collections.abc import Mapping
 from enum import Enum, auto
@@ -152,6 +153,11 @@ def __which():
 
 
 @decorators.memoize
+def __which_FTL():
+    return salt.utils.path.which("pihole-FTL")
+
+
+@decorators.memoize
 def _get_runtype() -> Runtype:
     if __which():
         return Runtype.LOCAL
@@ -247,7 +253,34 @@ def _pihole(subcmd, args=None):
     out = __salt__["cmd.run_all"](shlex.join(cmd))
 
     if out["retcode"]:
-        raise CommandExecutionError("Failed running pihole.")
+        raise CommandExecutionError(
+            "Failed running pihole: " + out["stderr"] or out["stdout"]
+        )
+
+    return out["stdout"] or True
+
+
+@_needs_cli
+def _pihole_ftl(subcmd, args=None):
+    """
+    Run arbitrary pihole-FTL commands.
+    """
+
+    if args is None:
+        args = []
+
+    if not isinstance(subcmd, list):
+        subcmd = [subcmd]
+
+    cmd = [__which_FTL()] + subcmd + args
+
+    # shlex.join needs python >=3.8
+    out = __salt__["cmd.run_all"](shlex.join(cmd))
+
+    if out["retcode"]:
+        raise CommandExecutionError(
+            "Failed running pihole-FTL: " + out["stderr"] or out["stdout"]
+        )
 
     return out["stdout"] or True
 
@@ -1811,6 +1844,91 @@ def static_dhcp_list():
     # return out
 
 
+def totp_token_get():
+    """
+    Generates a new TOTP token. Needs to be run local to the PiHole node.
+
+    .. hint::
+        If no TOTP secret has been set, returns 0.
+    """
+    return _pihole_ftl("--totp")
+
+
+def totp_secret_set(new=None, *_, force=False):
+    """
+    Set the TOTP secret.
+
+    new
+        The new value. If unset, generates a random one.
+
+    force
+        Force TOTP secret regeneration. If this is left at its default value of ``False``,
+        calling this function only writes a TOTP secret if none has been set previously.
+        Also required if this function is called on a node that is not a PiHole one since
+        it's impossible to check whether a TOTP secret has been set from outside.
+
+        .. warning::
+            Regenerating a TOTP secret invalidates all currently setup authenticator apps.
+    """
+    try:
+        isset = totp_secret_isset()
+    except CommandExecutionError as err:
+        if not force:
+            raise CommandExecutionError(
+                "Failed checking whether TOTP secret is set. Pass force=True to skip this check."
+            ) from err
+        isset = None
+
+    if isset and not force:
+        raise CommandExecutionError(
+            "TOTP secret is already set. Pass force=true to overwrite anyways."
+        )
+
+    if new is None:
+        new = totp_secret_generate()
+
+    if not re.match(r"^[A-Z2-7]{20}$", new):
+        raise CommandExecutionError(
+            "TOTP secret has a wrong format. It needs to be a base32 string of 20 characters"
+        )
+
+    config_set("webserver.api.totp_secret", new)
+    return True
+
+
+def totp_secret_remove():
+    """
+    Remove the TOTP secret.
+    """
+    config_set("webserver.api.totp_secret", "")
+    return True
+
+
+def totp_secret_verify(secret):
+    """
+    Verify the TOTP secret. Needs to be run local to the PiHole node.
+    """
+    configured = _config_get_local("webserver.api.totp_secret", False)
+    return secrets.compare_digest(secret, configured)
+
+
+def totp_secret_isset():
+    """
+    Check whether the TOTP secret is initialized. Needs to be run local to the PiHole node.
+    """
+    return bool(_config_get_local("webserver.api.totp_secret", False))
+
+
+def totp_secret_generate():
+    """
+    Generates a random base32 string suitable for ``webserver.api.totp_secret``.
+
+    .. important::
+        Does not set the value, just generates it.
+    """
+    return __salt__["random.get_str"](20, chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ234567")
+
+
 def update():
     """
     Update PiHole to the most recent version.
@@ -1860,9 +1978,9 @@ def update_gravity():
 def _version_api():
     info = api("GET", "info/version")["version"]
     return {
-        "core": info["core"]["local"]["version"],
-        "ftl": info["ftl"]["local"]["version"],
-        "web": info["web"]["local"]["version"],
+        "core": info["core"]["local"]["version"].lstrip("v"),
+        "ftl": info["ftl"]["local"]["version"].lstrip("v"),
+        "web": info["web"]["local"]["version"].lstrip("v"),
     }
 
 

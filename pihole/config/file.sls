@@ -1,5 +1,13 @@
 # vim: ft=sls
 
+{#-
+    Manages the `pihole.toml` configuration.
+
+    If `pihole:config:dnsmasq` is set, additionally manages a dnsmasq configuration file.
+    This is usually not necessary, just set `pihole:config:app:misc:dnsmasq_lines`.
+    If used anyways, this formula ensures `pihole:config:app:misc:etc_dnsmasq_d` is enabled.
+#}
+
 {%- set tplroot = tpldir.split("/")[0] %}
 {%- set sls_package_install = tplroot ~ ".package.install" %}
 {%- from tplroot ~ "/map.jinja" import mapdata as pihole with context %}

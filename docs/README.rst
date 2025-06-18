@@ -69,7 +69,6 @@ This installs the pihole package,
 manages the pihole configuration file,
 adlists, blacklists, custom CNAME and DNS config,
 groups, whitelists, then starts the pihole-FTL service.
-Also manages the lighttpd server regarding TLS configuration.
 
 
 ``pihole.package``
@@ -86,8 +85,25 @@ Warning:
 
 ``pihole.config``
 ^^^^^^^^^^^^^^^^^
-Manages the PiHole, pihole-FTL and custom dnsmasq configurations.
+Manages the PiHole API password, the `pihole.toml` configuration as well as the dnsmasq one, if configured.
 Has a dependency on `pihole.package`_.
+
+
+``pihole.config.file``
+^^^^^^^^^^^^^^^^^^^^^^
+Manages the `pihole.toml` configuration.
+
+If `pihole:config:dnsmasq` is set, additionally manages a dnsmasq configuration file.
+This is usually not necessary, just set `pihole:config:app:misc:dnsmasq_lines`.
+If used anyways, this formula ensures `pihole:config:app:misc:etc_dnsmasq_d` is enabled.
+
+
+``pihole.config.secrets``
+^^^^^^^^^^^^^^^^^^^^^^^^^
+Manages the PiHole API password.
+If none was provided in `pihole:secrets:api_password:(pillar|plaintext)`
+and it is unset when rendering this state, a random one is generated
+to ensure it is set.
 
 
 ``pihole.cert``
@@ -138,19 +154,13 @@ Starts the pihole-FTL service and enables it at boot time.
 Has a dependency on `pihole.config`_.
 
 
-``pihole.tls``
-^^^^^^^^^^^^^^
-Configure and enable TLS for PiHole (lighttpd).
-Has a dependency on `pihole.package`_.
-
-
 ``pihole.clean``
 ^^^^^^^^^^^^^^^^
 *Meta-state*.
 
 Undoes some operations performed in the ``pihole`` meta-state
 in reverse order, i.e.
-removes TLS configuration from lighttpd,
+removes generated TLS certificates,
 stops the service,
 removes the configuration.
 The package cannot be uninstalled automatically.
@@ -213,11 +223,6 @@ This does not restart PiHole on its own. To apply, you will need to restart manu
 ``pihole.service.clean``
 ^^^^^^^^^^^^^^^^^^^^^^^^
 Stops the pihole-FTL service and disables it at boot time.
-
-
-``pihole.tls.clean``
-^^^^^^^^^^^^^^^^^^^^
-Removes TLS configuration from lighttpd.
 
 
 
