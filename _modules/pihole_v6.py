@@ -1232,11 +1232,11 @@ def custom_dns_add(domain, ip, force=False, now=True):
             raise CommandExecutionError(
                 f"A mapping for {domain} already exists. Set force=true to update it."
             )
-        if current[domain] == f"{domain} {ip}":
+        if current[domain] == f"{ip} {domain}":
             return True
         config_item_rm("dns.hosts", current[domain])
 
-    res = config_item_add("dns.hosts", f"{domain} {ip}")
+    res = config_item_add("dns.hosts", f"{ip} {domain}")
     if now:
         restartdns()
     return res or True
@@ -1269,7 +1269,7 @@ def custom_dns_remove(domain, ip=None, now=True):
             f"{domain} does not exist in PiHole custom hosts config."
         )
 
-    if ip and not hosts[domain].startswith(f"{domain} {ip}"):
+    if ip and not hosts[domain].startswith(f"{ip} {domain}"):
         raise CommandExecutionError(f"{domain} does not map to {ip}.")
 
     res = config_item_rm("dns.hosts", hosts[domain])
